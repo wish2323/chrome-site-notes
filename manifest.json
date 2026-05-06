@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "페이지 메모장",
+  "version": "1.0.0",
+  "description": "어떤 웹사이트든 URL에 연동된 메모를 사이드바에 저장합니다",
+  "permissions": ["storage", "tabs"],
+  "action": {
+    "default_title": "메모장 열기/닫기",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_end",
+      "all_frames": false
+    }
+  ],
+  "commands": {
+    "toggle": {
+      "suggested_key": {
+        "default": "Alt+Shift+N",
+        "mac": "Alt+Shift+N"
+      },
+      "description": "메모장 사이드바 열기/닫기"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

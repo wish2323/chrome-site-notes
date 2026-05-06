@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy – Site Notes</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      color: #1f2937;
+      background: #fafaf8;
+      padding: 48px 24px 80px;
+    }
+
+    .wrap {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      color: #6366f1;
+      background: rgba(99, 102, 241, 0.08);
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #111827;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .meta {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-bottom: 48px;
+    }
+
+    h2 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #111827;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 40px 0 12px;
+    }
+
+    p { color: #374151; margin-bottom: 12px; }
+
+    ul {
+      list-style: none;
+      margin-bottom: 12px;
+    }
+
+    ul li {
+      color: #374151;
+      padding: 4px 0 4px 20px;
+      position: relative;
+    }
+
+    ul li::before {
+      content: "–";
+      position: absolute;
+      left: 0;
+      color: #9ca3af;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin: 16px 0;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 6px;
+    }
+
+    .card p { margin: 0; font-size: 13.5px; }
+
+    .highlight {
+      background: rgba(99, 102, 241, 0.06);
+      border: 1px solid rgba(99, 102, 241, 0.15);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 24px 0;
+      font-size: 14px;
+      color: #374151;
+    }
+
+    .highlight strong { color: #4f46e5; }
+
+    hr {
+      border: none;
+      border-top: 1px solid #e5e7eb;
+      margin: 48px 0 32px;
+    }
+
+    .contact {
+      font-size: 13.5px;
+      color: #6b7280;
+    }
+
+    .contact a { color: #6366f1; text-decoration: none; }
+    .contact a:hover { text-decoration: underline; }
+
+    @media (prefers-color-scheme: dark) {
+      body { background: #111113; color: #e5e7eb; }
+      h1, h2, .card-title { color: #f9fafb; }
+      p, ul li { color: #9ca3af; }
+      .card { background: #1c1c1e; border-color: #2c2c2e; }
+      .card p { color: #9ca3af; }
+      hr { border-color: #2c2c2e; }
+      .contact { color: #6b7280; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Privacy Policy</span>
+    <h1>Site Notes</h1>
+    <p class="meta">Last updated: May 2025</p>
+
+    <div class="highlight">
+      <strong>Short version:</strong> Site Notes stores your notes only in your own Google account via Chrome Sync. We collect no personal data, run no analytics, and share nothing with third parties.
+    </div>
+
+    <h2>What We Collect</h2>
+    <p>Site Notes stores only the notes you write. Each note is associated with the URL of the page you were viewing when you wrote it.</p>
+    <p>This data is stored exclusively through <strong>Chrome Storage Sync</strong> — a feature built into the Chrome browser that saves data to your Google account. We have no access to this data.</p>
+
+    <h2>What We Do Not Collect</h2>
+    <ul>
+      <li>No names, email addresses, or account information</li>
+      <li>No browsing history or page content</li>
+      <li>No analytics or usage tracking</li>
+      <li>No crash reports or diagnostics</li>
+      <li>No cookies or fingerprinting</li>
+    </ul>
+
+    <h2>How Your Data Is Stored</h2>
+    <div class="card">
+      <div class="card-title">Chrome Storage Sync</div>
+      <p>Your notes are saved using the <code>chrome.storage.sync</code> API and synced across your devices via your Google account — the same mechanism Chrome uses to sync bookmarks and settings. Google's own privacy policy governs this storage.</p>
+    </div>
+
+    <h2>Third Parties</h2>
+    <p>Site Notes does not send your data to any external server, analytics service, or third party. There is no backend. Your notes never leave your own Google account.</p>
+
+    <h2>Permissions</h2>
+    <p>The extension requests the following Chrome permissions:</p>
+    <ul>
+      <li><strong>storage</strong> — to save and sync your notes</li>
+      <li><strong>tabs</strong> — to detect the current page URL and update the toolbar badge</li>
+    </ul>
+    <p>No other permissions are requested or used.</p>
+
+    <h2>Data Deletion</h2>
+    <p>You can delete any note at any time using the "Clear" button within the extension. Uninstalling the extension removes it from Chrome's local storage. To remove synced data from your Google account, use Chrome's "Clear sync data" option in Chrome settings.</p>
+
+    <h2>Children's Privacy</h2>
+    <p>Site Notes does not knowingly collect any information from children under the age of 13.</p>
+
+    <h2>Changes to This Policy</h2>
+    <p>If this policy changes, the updated date at the top of this page will be revised. Continued use of the extension after changes constitutes acceptance of the new policy.</p>
+
+    <hr />
+
+    <p class="contact">
+      Questions? Contact us at
+      <a href="mailto:obagwish@gmail.com">obagwish@gmail.com</a>
+    </p>
+  </div>
+</body>
+</html>
