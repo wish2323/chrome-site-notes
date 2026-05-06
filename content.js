@@ -8,11 +8,32 @@
   let isListView = false;
   let debounceTimer = null;
 
-  // 목록에서 클릭해서 넘어온 경우 자동 오픈
+  // 기본은 로컬. 프리미엄이면 sync로 전환.
+  let noteStore = chrome.storage.local;
+
+  chrome.storage.local.get('pn_premium', (r) => {
+    if (r.pn_premium) noteStore = chrome.storage.sync;
+    updateSyncBadge(!!r.pn_premium);
+    noteStore.get(STORAGE_KEY, (result) => {
+      sendBadge(!!(result[STORAGE_KEY]?.trim()));
+    });
+  });
+
+  // 옵션 페이지에서 프리미엄 상태가 바뀌면 실시간 반영
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && 'pn_premium' in changes) {
+      const isPremium = !!changes.pn_premium.newValue;
+      noteStore = isPremium ? chrome.storage.sync : chrome.storage.local;
+      updateSyncBadge(isPremium);
+      if (isOpen && !isListView) loadNote();
+    }
+  });
+
+  // Auto-open after navigating from notes list
   const shouldAutoOpen = !!sessionStorage.getItem('pn-auto-open');
   if (shouldAutoOpen) sessionStorage.removeItem('pn-auto-open');
 
-  // ─── Shadow DOM (CSS 완전 격리) ────────────────────────────────────
+  // ─── Shadow DOM ────────────────────────────────────────────────────
   const host = document.createElement('div');
   host.id = 'pn-host';
   document.body.appendChild(host);
@@ -39,7 +60,6 @@
       pointer-events: auto;
     }
 
-    /* ── 사이드바 컨테이너 ── */
     #sidebar {
       height: 100%;
       position: relative;
@@ -51,7 +71,6 @@
       color: #1f2937;
     }
 
-    /* ── 리사이즈 핸들 ── */
     #handle {
       position: absolute;
       left: 0; top: 0;
@@ -62,7 +81,6 @@
     }
     #handle:hover { background: rgba(99,102,241,0.2); }
 
-    /* ── 뷰 슬라이드 ── */
     .view {
       position: absolute;
       inset: 0;
@@ -72,12 +90,11 @@
       transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
       will-change: transform;
     }
-    #view-note  { transform: translateX(0); }
-    #view-list  { transform: translateX(100%); }
+    #view-note { transform: translateX(0); }
+    #view-list { transform: translateX(100%); }
     #sidebar.show-list #view-note { transform: translateX(-30%); }
     #sidebar.show-list #view-list { transform: translateX(0); }
 
-    /* ── 헤더 ── */
     .view-header {
       display: flex;
       align-items: center;
@@ -113,14 +130,26 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    #sync-badge {
+      font-size: 10px;
+      font-weight: 600;
+      color: #6366f1;
+      background: rgba(99,102,241,0.1);
+      padding: 2px 7px;
+      border-radius: 10px;
+      display: none;
+      align-items: center;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    #sync-badge.visible { display: inline-flex; }
+
     .header-actions {
       display: flex;
       align-items: center;
       gap: 1px;
       flex-shrink: 0;
     }
-
-    /* ── 저장됨 표시 ── */
     #saved {
       font-size: 11px;
       color: #6366f1;
@@ -131,7 +160,6 @@
     }
     #saved.on { opacity: 1; }
 
-    /* ── 공통 버튼 ── */
     button {
       background: none;
       border: none;
@@ -148,10 +176,10 @@
     }
     #close-btn, #close-btn-list { font-size: 18px; padding: 2px 6px; }
     #list-btn { font-size: 15px; }
-    #back-btn  { font-size: 20px; padding: 2px 4px; color: #6b7280; }
+    #settings-btn { font-size: 14px; }
+    #back-btn { font-size: 20px; padding: 2px 4px; color: #6b7280; }
     button:hover { background: #f3f4f6; color: #374151; }
 
-    /* ── 메모 textarea ── */
     textarea {
       flex: 1;
       width: 100%;
@@ -168,11 +196,7 @@
     }
     textarea::placeholder { color: #d1d5db; }
 
-    /* ── 전체 메모 목록 ── */
-    #notes-container {
-      flex: 1;
-      overflow-y: auto;
-    }
+    #notes-container { flex: 1; overflow-y: auto; }
 
     .note-item {
       display: flex;
@@ -235,7 +259,6 @@
       font-size: 13px;
     }
 
-    /* ── 다크모드 ── */
     @media (prefers-color-scheme: dark) {
       #sidebar {
         background: #1c1c1e;
@@ -261,7 +284,7 @@
   `;
   shadow.appendChild(style);
 
-  // ─── HTML 구조 ────────────────────────────────────────────────────
+  // ─── HTML ──────────────────────────────────────────────────────────
   const container = document.createElement('div');
   container.id = 'sidebar';
   container.innerHTML = `
@@ -270,13 +293,17 @@
     <div class="view" id="view-note">
       <div class="view-header">
         <div class="header-info">
-          <span class="view-title">Site Notes</span>
+          <div class="header-info-row">
+            <span class="view-title">Site Notes</span>
+            <span id="sync-badge">↕ Sync</span>
+          </div>
           <span class="url-label" id="url-label"></span>
         </div>
         <div class="header-actions">
           <span id="saved">Saved ✓</span>
           <button id="clear-btn">Clear</button>
           <button id="list-btn" title="All notes">≡</button>
+          <button id="settings-btn" title="Settings">⚙</button>
           <button id="close-btn">×</button>
         </div>
       </div>
@@ -298,23 +325,22 @@
   `;
   shadow.appendChild(container);
 
-  // XSS 방지: URL은 textContent로 삽입
   const $s = (sel) => shadow.querySelector(sel);
   $s('#url-label').textContent = URL_DISPLAY;
-
-  // Shadow DOM 내부에서 발생한 키보드 이벤트가 shadow 경계를 넘어
-  // document 레벨 핸들러(예: 네이버 검색창 포커스 탈취)에 도달하는 것을 차단
-  ['keydown', 'keypress', 'keyup'].forEach(type => {
-    host.addEventListener(type, (e) => e.stopPropagation());
-  });
 
   const textarea = $s('#note');
   const savedEl  = $s('#saved');
   const sidebar  = $s('#sidebar');
 
-  // ─── 메모 로드 / 저장 ─────────────────────────────────────────────
+  // ─── Sync badge ────────────────────────────────────────────────────
+  function updateSyncBadge(isPremium) {
+    const badge = $s('#sync-badge');
+    if (badge) badge.classList.toggle('visible', isPremium);
+  }
+
+  // ─── Storage ───────────────────────────────────────────────────────
   function loadNote() {
-    chrome.storage.sync.get(STORAGE_KEY, (result) => {
+    noteStore.get(STORAGE_KEY, (result) => {
       textarea.value = result[STORAGE_KEY] ?? '';
       sendBadge(!!(result[STORAGE_KEY]?.trim()));
     });
@@ -322,7 +348,7 @@
 
   function saveNote() {
     const val = textarea.value;
-    chrome.storage.sync.set({ [STORAGE_KEY]: val }, () => {
+    noteStore.set({ [STORAGE_KEY]: val }, () => {
       sendBadge(!!val.trim());
       flashSaved();
     });
@@ -339,13 +365,12 @@
     });
   }
 
-  // ─── 자동저장 (500ms 디바운스) ───────────────────────────────────
   textarea.addEventListener('input', () => {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(saveNote, 500);
   });
 
-  // ─── 열기 / 닫기 ──────────────────────────────────────────────────
+  // ─── Open / Close ──────────────────────────────────────────────────
   function openSidebar() {
     isOpen = true;
     host.classList.add('open');
@@ -360,7 +385,7 @@
     host.classList.remove('open');
   }
 
-  // ─── 뷰 전환 (메모 ↔ 전체 목록) ──────────────────────────────────
+  // ─── View switch ───────────────────────────────────────────────────
   function showListView() {
     isListView = true;
     sidebar.classList.add('show-list');
@@ -372,9 +397,9 @@
     sidebar.classList.remove('show-list');
   }
 
-  // ─── 전체 메모 목록 ───────────────────────────────────────────────
+  // ─── Notes list ────────────────────────────────────────────────────
   function createNoteItem(key, noteText) {
-    const urlPath = key.slice(3); // 'pn:' 제거
+    const urlPath = key.slice(3);
     const preview = noteText.trim().split('\n')[0].slice(0, 100);
     const isCurrent = key === STORAGE_KEY;
 
@@ -405,7 +430,7 @@
 
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'note-item-delete';
-    deleteBtn.title = '삭제';
+    deleteBtn.title = 'Delete';
     deleteBtn.textContent = '×';
 
     item.appendChild(body);
@@ -420,7 +445,7 @@
     deleteBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       if (!window.confirm(`Delete note for "${urlPath}"?`)) return;
-      chrome.storage.sync.remove(key, () => {
+      noteStore.remove(key, () => {
         item.remove();
         const remaining = $s('#notes-container').querySelectorAll('.note-item').length;
         $s('#list-title').textContent = remaining ? `Saved notes (${remaining})` : 'Saved notes';
@@ -445,7 +470,7 @@
     const c = $s('#notes-container');
     c.innerHTML = '';
 
-    chrome.storage.sync.get(null, (allData) => {
+    noteStore.get(null, (allData) => {
       const keys = Object.keys(allData).filter(k => k.startsWith('pn:') && allData[k]?.trim());
 
       if (!keys.length) {
@@ -454,7 +479,6 @@
         return;
       }
 
-      // current page first, then alphabetical
       keys.sort((a, b) => {
         if (a === STORAGE_KEY) return -1;
         if (b === STORAGE_KEY) return 1;
@@ -466,19 +490,22 @@
     });
   }
 
-  // ─── 이벤트 바인딩 ────────────────────────────────────────────────
+  // ─── Event bindings ────────────────────────────────────────────────
   $s('#close-btn').addEventListener('click', closeSidebar);
   $s('#close-btn-list').addEventListener('click', closeSidebar);
   $s('#list-btn').addEventListener('click', showListView);
   $s('#back-btn').addEventListener('click', showNoteView);
+  $s('#settings-btn').addEventListener('click', () => {
+    chrome.runtime.sendMessage({ type: 'open-options' });
+  });
 
   $s('#clear-btn').addEventListener('click', () => {
     if (!window.confirm('Delete note for this page?')) return;
     textarea.value = '';
-    chrome.storage.sync.remove(STORAGE_KEY, () => sendBadge(false));
+    noteStore.remove(STORAGE_KEY, () => sendBadge(false));
   });
 
-  // ─── 리사이즈 핸들 ───────────────────────────────────────────────
+  // ─── Resize ────────────────────────────────────────────────────────
   $s('#handle').addEventListener('mousedown', (e) => {
     const startX = e.clientX;
     const startW = host.offsetWidth;
@@ -501,14 +528,14 @@
     e.preventDefault();
   });
 
-  // ─── 메시지 수신 (아이콘 클릭 / 단축키) ─────────────────────────
-  chrome.runtime.onMessage.addListener((msg) => {
-    if (msg.type === 'toggle') isOpen ? closeSidebar() : openSidebar();
+  // ─── Keyboard event isolation (prevent page from stealing focus) ───
+  ['keydown', 'keypress', 'keyup'].forEach(type => {
+    host.addEventListener(type, (e) => e.stopPropagation());
   });
 
-  // ─── 초기화 ──────────────────────────────────────────────────────
-  chrome.storage.sync.get(STORAGE_KEY, (result) => {
-    sendBadge(!!(result[STORAGE_KEY]?.trim()));
+  // ─── Message listener ──────────────────────────────────────────────
+  chrome.runtime.onMessage.addListener((msg) => {
+    if (msg.type === 'toggle') isOpen ? closeSidebar() : openSidebar();
   });
 
   if (shouldAutoOpen) setTimeout(openSidebar, 100);

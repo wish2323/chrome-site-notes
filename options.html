@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Site Notes – Settings</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #1f2937;
+      background: #fafaf8;
+      padding: 48px 24px 80px;
+    }
+
+    .wrap { max-width: 480px; margin: 0 auto; }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 36px;
+    }
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: #6366f1;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .logo-icon svg { width: 18px; height: 18px; fill: #fff; }
+    .logo-name { font-size: 16px; font-weight: 700; color: #111827; letter-spacing: -0.02em; }
+    .logo-sub { font-size: 12px; color: #9ca3af; }
+
+    /* Plan status card */
+    .plan-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .plan-card.premium { border-color: rgba(99,102,241,0.3); background: rgba(99,102,241,0.03); }
+
+    .plan-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #9ca3af;
+      margin-bottom: 8px;
+    }
+    .plan-name {
+      font-size: 22px;
+      font-weight: 700;
+      color: #111827;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+    .plan-name.premium-name { color: #4f46e5; }
+    .plan-desc { font-size: 13px; color: #6b7280; }
+
+    .feature-list {
+      list-style: none;
+      margin: 16px 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .feature-list li {
+      font-size: 13px;
+      color: #374151;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .feature-list .check { color: #6366f1; font-size: 15px; }
+    .feature-list .dim { color: #9ca3af; }
+
+    .key-display {
+      margin-top: 16px;
+      padding: 10px 14px;
+      background: #f3f4f6;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #6b7280;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      display: none;
+    }
+    .key-display.visible { display: block; }
+
+    /* Upgrade section */
+    .section {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 6px;
+    }
+    .section-desc {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 16px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 9px 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      color: #111827;
+      background: #fff;
+      outline: none;
+      transition: border-color 150ms;
+      min-width: 0;
+    }
+    input[type="text"]::placeholder { color: #d1d5db; font-family: inherit; }
+    input[type="text"]:focus { border-color: #6366f1; }
+    input[type="text"].error { border-color: #ef4444; }
+
+    .btn {
+      padding: 9px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 120ms, background 120ms;
+      white-space: nowrap;
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: #6366f1; color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #4f46e5; }
+    .btn-danger { background: #fee2e2; color: #ef4444; }
+    .btn-danger:hover:not(:disabled) { background: #fecaca; }
+
+    .msg {
+      margin-top: 10px;
+      font-size: 12.5px;
+      min-height: 18px;
+    }
+    .msg.ok { color: #059669; }
+    .msg.err { color: #ef4444; }
+
+    .get-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      color: #6366f1;
+      text-decoration: none;
+      margin-top: 12px;
+    }
+    .get-link:hover { text-decoration: underline; }
+
+    hr {
+      border: none;
+      border-top: 1px solid #e5e7eb;
+      margin: 32px 0 20px;
+    }
+
+    .footer {
+      font-size: 12px;
+      color: #9ca3af;
+      display: flex;
+      gap: 16px;
+    }
+    .footer a { color: #9ca3af; text-decoration: none; }
+    .footer a:hover { color: #6366f1; }
+
+    @media (prefers-color-scheme: dark) {
+      body { background: #111113; color: #e5e7eb; }
+      .plan-card, .section { background: #1c1c1e; border-color: #2c2c2e; }
+      .plan-card.premium { background: rgba(99,102,241,0.06); border-color: rgba(99,102,241,0.25); }
+      .plan-name, .section-title, .logo-name { color: #f9fafb; }
+      .key-display { background: #2c2c2e; }
+      input[type="text"] { background: #2c2c2e; border-color: #3c3c3e; color: #f9fafb; }
+      input[type="text"]:focus { border-color: #6366f1; }
+    }
+
+    /* spinner */
+    .spinner {
+      display: inline-block;
+      width: 12px; height: 12px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="2.5" rx="1.25"/><rect x="4" y="10.75" width="16" height="2.5" rx="1.25"/><rect x="4" y="17.5" width="10" height="2.5" rx="1.25"/></svg>
+      </div>
+      <div>
+        <div class="logo-name">Site Notes</div>
+        <div class="logo-sub">Settings</div>
+      </div>
+    </div>
+
+    <!-- Plan card (JS swaps content) -->
+    <div class="plan-card" id="plan-card">
+      <div class="plan-label">Current plan</div>
+      <div class="plan-name" id="plan-name">Free</div>
+      <div class="plan-desc" id="plan-desc">Notes saved locally on this device.</div>
+      <ul class="feature-list">
+        <li><span class="check">✓</span> Notes per page</li>
+        <li><span class="check">✓</span> Unlimited notes</li>
+        <li><span class="dim">–</span> <span class="dim">Sync across devices</span></li>
+      </ul>
+      <div class="key-display" id="key-display"></div>
+    </div>
+
+    <!-- Activate section (shown when free) -->
+    <div class="section" id="section-activate">
+      <div class="section-title">Upgrade to Premium</div>
+      <div class="section-desc">Enter your license key to enable cross-device sync via your Google account.</div>
+      <div class="input-row">
+        <input type="text" id="key-input" placeholder="XXXX-XXXX-XXXX-XXXX" spellcheck="false" autocomplete="off" />
+        <button class="btn btn-primary" id="activate-btn">Activate</button>
+      </div>
+      <div class="msg" id="activate-msg"></div>
+    </div>
+
+    <!-- Deactivate section (shown when premium) -->
+    <div class="section" id="section-deactivate" style="display:none">
+      <div class="section-title">Deactivate License</div>
+      <div class="section-desc">Your notes will be moved back to local storage on this device.</div>
+      <button class="btn btn-danger" id="deactivate-btn">Deactivate</button>
+      <div class="msg" id="deactivate-msg"></div>
+    </div>
+
+    <hr />
+    <div class="footer">
+      <a href="https://wish2323.github.io/chrome-site-notes/privacy-policy.html" target="_blank">Privacy Policy</a>
+      <a href="mailto:obagwish@gmail.com">Contact</a>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
